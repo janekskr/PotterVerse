@@ -2,7 +2,7 @@ import { Text, type TextProps, StyleSheet } from 'react-native';
 
 import { useThemeColor } from '@/hooks/useThemeColor';
 
-export type Weights = "black" | "bold" | "italic" | "light" | "semibold" | "medium" | "extrabold" | "regular"
+export type Weights = "Black" | "Bold" | "Italic" | "Light" | "SemiBold" | "Medium" | "ExtraBold" | "Regular"
 
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
@@ -46,7 +46,7 @@ export function ThemedText({
   style,
   lightColor,
   darkColor,
-  weight= "regular",
+  weight= "Regular",
   type = 'default',
   ...rest
 }: ThemedTextProps) {
@@ -57,7 +57,7 @@ export function ThemedText({
   return (
     <Text
       style={[
-        {fontFamily: `Poppins-${weight}`},
+        {fontFamily: `Poppins_${weight}`},
         { color },
         variantStyle,
         style,
