@@ -1,14 +1,23 @@
-import {
-    QueryClient,
-    QueryClientProvider,
-} from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, useIsFetching } from '@tanstack/react-query';
+import Loader from '../Loader';
 
-export const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
-export default function ReactQueryProvider({children}: {children: React.ReactNode}) {
+function LoaderProvider({ children }: React.PropsWithChildren) {
+  const isFetching = useIsFetching()
+
+  if(isFetching) return <Loader/>
+
+  return children
+
+}
+
+export default function ReactQueryProvider({ children }: React.PropsWithChildren) {
   return (
     <QueryClientProvider client={queryClient}>
+      <LoaderProvider>
         {children}
-    </QueryClientProvider>  
-  )
+      </LoaderProvider>
+    </QueryClientProvider>
+  );
 }

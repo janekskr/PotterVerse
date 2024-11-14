@@ -2,13 +2,10 @@ import { Text, type TextProps, StyleSheet } from 'react-native';
 
 import { useThemeColor } from '@/hooks/useThemeColor';
 
-export type Weights = "Black" | "Bold" | "Italic" | "Light" | "SemiBold" | "Medium" | "ExtraBold" | "Regular"
-
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
   type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
-  weight?: Weights
 };
 
 const styles = StyleSheet.create({
@@ -19,10 +16,12 @@ const styles = StyleSheet.create({
   defaultSemiBold: {
     fontSize: 16,
     lineHeight: 24,
+    fontWeight: "semibold"
   },
   title: {
     fontSize: 32,
     lineHeight: 32,
+    fontWeight: "bold"
   },
   subtitle: {
     fontSize: 20,
@@ -46,7 +45,6 @@ export function ThemedText({
   style,
   lightColor,
   darkColor,
-  weight= "Regular",
   type = 'default',
   ...rest
 }: ThemedTextProps) {
@@ -57,7 +55,7 @@ export function ThemedText({
   return (
     <Text
       style={[
-        {fontFamily: `Poppins_${weight}`},
+        // {fontFamily: "HarryP"},
         { color },
         variantStyle,
         style,

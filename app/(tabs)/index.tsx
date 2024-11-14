@@ -1,68 +1,149 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useCallback } from "react";
+import { Image, StyleSheet, ActivityIndicator, Pressable } from "react-native";
+import { FlashList } from "@shopify/flash-list";
+import {
+  Container,
+  ParallaxScrollView,
+  ScrollableContainer,
+  Text,
+  View,
+} from "@/components/ui";
+import { useCharacters } from "@/hooks/useCharacters";
+import { Character } from "@/lib/types";
+import { Link } from "expo-router";
 
-import { HelloWave } from '@/components/HelloWave';
-import { ParallaxScrollView, Text, View } from '@/components/ui';
+const PAGE_SIZE = 100;
+const PLACEHOLDER_IMAGE = "https://avatarfiles.alphacoders.com/375/375208.png";
 
 export default function HomeScreen() {
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    error,
+  } = useCharacters(PAGE_SIZE);
+
+  const renderItem = useCallback(
+    ({ item }: { item: Character }) => (
+      <Link href={{
+        pathname: "/character/[id]",
+        params: {id: item.id}
+      }} asChild>
+        <Pressable>
+          <View style={styles.characterCard}>
+            <Image
+              source={{ uri: item.attributes.image || PLACEHOLDER_IMAGE }}
+              style={styles.characterImage}
+              accessibilityLabel={`Image of ${item.attributes.name}`}
+            />
+            <View style={styles.characterInfo}>
+              <Text style={styles.characterName}>{item.attributes.name}</Text>
+              {item.attributes.house && (
+                <Text style={styles.characterHouse}>
+                  House: {item.attributes.house}
+                </Text>
+              )}
+              {item.attributes.species && (
+                <Text style={styles.characterSpecies}>
+                  Species: {item.attributes.species}
+                </Text>
+              )}
+            </View>
+          </View>
+        </Pressable>
+      </Link>
+    ),
+    []
+  );
+
+  const keyExtractor = useCallback((item: Character) => item.id, []);
+
+  const onEndReached = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const ListFooterComponent = useCallback(
+    () =>
+      isFetchingNextPage ? (
+        <ActivityIndicator style={{ marginVertical: 16 }} />
+      ) : null,
+    [isFetchingNextPage]
+  );
+
+  if (isLoading) {
+    return (
+      <Container style={{ alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator size="large" />
+      </Container>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Container style={{ alignItems: "center", justifyContent: "center" }}>
+        <Text>Error: {error?.message}</Text>
+      </Container>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <View style={styles.titleContainer}>
-        <Text type="title">Welcome!</Text>
-        <HelloWave />
-      </View>
-      <View style={styles.stepContainer}>
-        <Text type="subtitle">Step 1: Try it</Text>
-        <Text>
-          Edit <Text type="defaultSemiBold">app/(tabs)/index.tsx</Text> to see changes.
-          Press
-          <Text type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </Text>
-          to open developer tools.
-        </Text>
-      </View>
-      <View style={styles.stepContainer}>
-        <Text type="subtitle">Step 2: Explore</Text>
-        <Text>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </Text>
-      </View>
-      <View style={styles.stepContainer}>
-        <Text type="subtitle">Step 3: Get a fresh start</Text>
-        <Text>
-          When you're ready, run
-          <Text type="defaultSemiBold">npm run reset-project</Text> to get a fresh
-          <Text type="defaultSemiBold">app</Text> directory. This will move the current
-          <Text type="defaultSemiBold">app</Text> to
-          <Text type="defaultSemiBold">app-example</Text>.
-        </Text>
-      </View>
-    </ParallaxScrollView>
+    <FlashList
+      data={data.pages[0].data}
+      renderItem={renderItem}
+      keyExtractor={keyExtractor}
+      estimatedItemSize={PAGE_SIZE}
+      onEndReached={() => console.log("end reached")}
+      onEndReachedThreshold={0.5}
+      ListFooterComponent={ListFooterComponent}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    paddingHorizontal: 8,
+    paddingTop: 16,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  listContent: {
+    paddingHorizontal: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  characterCard: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    margin: 8,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  characterImage: {
+    width: "100%",
+    height: 150,
+    resizeMode: "cover",
+  },
+  characterInfo: {
+    padding: 12,
+  },
+  characterName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  characterHouse: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 2,
+  },
+  characterSpecies: {
+    fontSize: 14,
+    color: "#666",
   },
 });
