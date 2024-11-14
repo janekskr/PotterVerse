@@ -11,26 +11,26 @@ const PLACEHOLDER_IMAGE = "https://avatarfiles.alphacoders.com/375/375208.png";
 export default function CharacterDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  // const { data, isLoading, isError, error } = useQuery({
-  //   queryKey: ["characterDetail", id],
-  //   queryFn: () => fetchCharacterDetail(id),
-  //   enabled: !!id,
-  //   retry: false,
-  // });
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["characterDetail", id],
+    queryFn: () => fetchCharacterDetail(id),
+    enabled: !!id,
+    retry: false,
+  });
 
-  // if (isLoading) return <Loader />;
+  if (isLoading) return <Loader />;
 
-  // if (isError || !data) {
-  //   console.error("Error fetching character:", error);
-  //   return (
-  //     <Container style={styles.container}>
-  //       <Text>Nie znaleziono postaci</Text>
-  //       <Text>id: {id}</Text>
-  //       <Text>Error: {error instanceof Error ? error.message : 'Unknown error'}</Text>
-  //       <Link href="/">Powrót</Link>
-  //     </Container>
-  //   );
-  // }
+  if (isError || !data) {
+    console.error("Error fetching character:", error);
+    return (
+      <Container style={styles.container}>
+        <Text>Nie znaleziono postaci</Text>
+        <Text>id: {id}</Text>
+        <Text>Error: {error instanceof Error ? error.message : 'Unknown error'}</Text>
+        <Link href="/">Powrót</Link>
+      </Container>
+    );
+  }
 
   // const data ={
   //     id: "dde712de-4fce-487f-a365-e15bf01d31ce",
