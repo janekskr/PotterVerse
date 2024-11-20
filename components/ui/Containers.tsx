@@ -1,21 +1,22 @@
 import React from "react";
 import { ThemedView, ThemedViewProps } from "./ThemedView";
 import { ScrollView, StyleSheet, ViewStyle } from "react-native";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface ContainerProps extends ThemedViewProps {
-  children: React.ReactNode,
-  style?: ViewStyle
+  children: React.ReactNode;
+  style?: ViewStyle;
 }
 
-function ScrollableContainer({
-  children,
-  style,
-  ...rest
-}: ContainerProps) {
+function ScrollableContainer({ children, style, ...rest }: ContainerProps) {
+  const backgroundColor = useThemeColor(
+    { light: undefined, dark: undefined },
+    "background"
+  );
   return (
     <ScrollView
-      style={{ flex: 1}}
-      contentContainerStyle={[styles.container, style]}
+      style={{ flex: 1 }}
+      contentContainerStyle={[styles.container, { backgroundColor }, style]}
       {...rest}
     >
       {children}
@@ -23,11 +24,7 @@ function ScrollableContainer({
   );
 }
 
-function Container({
-  children,
-  style,
-  ...rest
-}: ContainerProps) {
+function Container({ children, style, ...rest }: ContainerProps) {
   return (
     <ThemedView
       style={[
@@ -35,7 +32,7 @@ function Container({
           flex: 1,
         },
         styles.container,
-        style
+        style,
       ]}
       {...rest}
     >
@@ -46,8 +43,7 @@ function Container({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "white",
-    paddingHorizontal: 30,
+    paddingHorizontal: 15,
     paddingVertical: 20,
     gap: 16,
   },

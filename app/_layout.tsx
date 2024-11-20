@@ -1,44 +1,63 @@
+import ReactQueryProvider from "@/components/provider/ReactQueryProvider";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Slot, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { useColorScheme } from "react-native";
 import "react-native-reanimated";
-import { useColorScheme } from "@/hooks/useColorScheme";
 
-import ReactQueryProvider from "@/components/provider/ReactQueryProvider";
+export { ErrorBoundary } from "expo-router";
+
+export const unstable_settings = {
+  initialRouteName: "(tabs)",
+};
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  
   const [loaded, error] = useFonts({
-    HarryP: "./assets/fonts/HarryP.ttf"
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    HarryP: require("../assets/fonts/HarryP.ttf"),
+    MagicSchoolOne: require("../assets/fonts/MagicSchoolOne.ttf"),
+    MagicSchoolTwo: require("../assets/fonts/MagicSchoolTwo.ttf"),
+    ...FontAwesome.font,
   });
 
   useEffect(() => {
-    if (loaded || error) {
+    if (error) throw error;
+  }, [error]);
+
+  useEffect(() => {
+    if (loaded) {
       SplashScreen.hideAsync();
     }
-  }, [loaded, error]);
+  }, [loaded]);
 
-  if (!loaded && !error) {
+  if (!loaded) {
     return null;
   }
 
+  return <RootLayoutNav />;
+}
+
+function RootLayoutNav() {
+  const colorScheme = useColorScheme();
+
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <ReactQueryProvider>
-      {/* <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack> */}
-      <Slot />
+    // <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DefaultTheme}>
+    <ReactQueryProvider>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+          <Stack.Screen name="character/[id]"/>
+        </Stack>
       </ReactQueryProvider>
     </ThemeProvider>
   );

@@ -1,34 +1,75 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import React from "react";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Link, Tabs } from "expo-router";
+import { Pressable } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { type IconProps } from "@expo/vector-icons/build/createIconSet";
+import { type ComponentProps } from "react";
+import Colors from "@/constants/Colors";
 
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+function TabBarIcon({
+  focused,
+  name,
+  ...rest
+}: IconProps<ComponentProps<typeof Ionicons>["name"]> & { focused: boolean }) {
+  return (
+    <Ionicons
+      size={28}
+      style={{ marginBottom: -3 }}
+      name={focused ? name as any : `${name}-outline`}
+      {...rest}
+    />
+  );
+}
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-      }}>
+    screenOptions={{
+      tabBarShowLabel: false,
+      tabBarLabelStyle: { marginBottom: -15 },
+      tabBarHideOnKeyboard: true,
+      tabBarActiveTintColor: Colors.yellow,
+    }}
+    >
       <Tabs.Screen
-        name="index"
+        name="search"
         options={{
-          title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+            <TabBarIcon name="search" color={color} focused={focused} />
           ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="index"
         options={{
-          title: 'Explore',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
+            <TabBarIcon
+              name="home"
+              focused={focused}
+              color={color}
+            />
+          ),
+          headerRight: () => (
+            <Link href="/modal" asChild>
+              <Pressable>
+                {({ pressed }) => (
+                  <FontAwesome
+                    name="info-circle"
+                    size={25}
+                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
+                  />
+                )}
+              </Pressable>
+            </Link>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="likes"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name="heart" focused={focused} color={color} />
           ),
         }}
       />

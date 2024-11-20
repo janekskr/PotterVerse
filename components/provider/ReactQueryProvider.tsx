@@ -8,16 +8,16 @@ function LoaderProvider({ children }: React.PropsWithChildren) {
 
   if(isFetching) return <Loader/>
 
-  return children
+  return <>{children}</>
 
 }
 
 export default function ReactQueryProvider({ children }: React.PropsWithChildren) {
   return (
     <QueryClientProvider client={queryClient}>
-      <LoaderProvider>
+      {/* <LoaderProvider> */}
         {children}
-      </LoaderProvider>
+      {/* </LoaderProvider> */}
     </QueryClientProvider>
   );
 }

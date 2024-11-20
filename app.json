@@ -1,14 +1,15 @@
 {
   "expo": {
-    "name": "potter-list",
-    "slug": "potter-list",
+    "name": "potter-app",
+    "slug": "potter-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -28,8 +29,7 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font",
-      "expo-asset"
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

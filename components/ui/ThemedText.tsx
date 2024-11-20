@@ -1,6 +1,5 @@
-import { Text, type TextProps, StyleSheet } from 'react-native';
-
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { Text, type TextProps, StyleSheet } from 'react-native';
 
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
@@ -21,7 +20,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     lineHeight: 32,
-    fontWeight: "bold"
+    letterSpacing: 1
   },
   subtitle: {
     fontSize: 20,
@@ -49,13 +48,11 @@ export function ThemedText({
   ...rest
 }: ThemedTextProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
-
   const variantStyle = variantStyles[type];
 
   return (
     <Text
       style={[
-        // {fontFamily: "HarryP"},
         { color },
         variantStyle,
         style,

@@ -25,11 +25,12 @@ export interface CharactersResponse {
   pagination: Pagination;
 }
 
-export const fetchCharacters = async (page: number, pageSize: number): Promise<CharactersResponse> => {
+export const fetchCharacters = async (page: number, pageSize: number, filterQuery: string = ""): Promise<CharactersResponse> => {
   const { data } = await api.get<ApiResponse>("/characters", {
     params: {
       'page[number]': page,
       'page[size]': pageSize,
+      filterQuery: filterQuery 
     },
   });
 
@@ -40,17 +41,13 @@ export const fetchCharacters = async (page: number, pageSize: number): Promise<C
 };
 
 export const fetchCharacterDetail = async (id: string): Promise<Character> => {
-  if (!id) {
-    throw new Error('Character ID is required');
-  }
-
   try {
-    const { data } = await api.get<{ data: Character }>(`/characters/${id}`);
+    const {data} = await api.get<{ data: Character }>(`/characters/${id}`);
     
-    if (!data || !data.data) {
+    if (!data) {
       throw new Error('No character data received');
     }
-
+    
     return data.data;
   } catch (error) {
     if (error instanceof Error) {

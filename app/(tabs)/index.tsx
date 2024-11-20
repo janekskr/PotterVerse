@@ -1,19 +1,16 @@
-import React, { useCallback } from "react";
-import { Image, StyleSheet, ActivityIndicator, Pressable } from "react-native";
-import { FlashList } from "@shopify/flash-list";
-import {
-  Container,
-  ParallaxScrollView,
-  ScrollableContainer,
-  Text,
-  View,
-} from "@/components/ui";
-import { useCharacters } from "@/hooks/useCharacters";
-import { Character } from "@/lib/types";
-import { Link } from "expo-router";
+'use client'
 
-const PAGE_SIZE = 100;
-const PLACEHOLDER_IMAGE = "https://avatarfiles.alphacoders.com/375/375208.png";
+import React, { useCallback } from "react"
+import { StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, Pressable } from "react-native"
+import { FlashList } from "@shopify/flash-list"
+import { Container, Text, View } from "@/components/ui"
+import { useCharacters } from "@/hooks/useCharacters"
+import { Character } from "@/lib/types"
+import { CharacterCard } from "@/components"
+import { Ionicons } from '@expo/vector-icons'
+import { router } from "expo-router"
+
+const PAGE_SIZE = 50
 
 export default function HomeScreen() {
   const {
@@ -24,126 +21,113 @@ export default function HomeScreen() {
     isLoading,
     isError,
     error,
-  } = useCharacters(PAGE_SIZE);
+  } = useCharacters(PAGE_SIZE)
 
-  const renderItem = useCallback(
-    ({ item }: { item: Character }) => (
-      <Link href={{
-        pathname: "/character/[id]",
-        params: {id: item.id}
-      }} asChild>
-        <Pressable>
-          <View style={styles.characterCard}>
-            <Image
-              source={{ uri: item.attributes.image || PLACEHOLDER_IMAGE }}
-              style={styles.characterImage}
-              accessibilityLabel={`Image of ${item.attributes.name}`}
-            />
-            <View style={styles.characterInfo}>
-              <Text style={styles.characterName}>{item.attributes.name}</Text>
-              {item.attributes.house && (
-                <Text style={styles.characterHouse}>
-                  House: {item.attributes.house}
-                </Text>
-              )}
-              {item.attributes.species && (
-                <Text style={styles.characterSpecies}>
-                  Species: {item.attributes.species}
-                </Text>
-              )}
-            </View>
-          </View>
-        </Pressable>
-      </Link>
-    ),
-    []
-  );
-
-  const keyExtractor = useCallback((item: Character) => item.id, []);
+  const renderItem = ({ item }: { item: Character }) => <CharacterCard character={item} />
 
   const onEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
+      fetchNextPage()
     }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const ListFooterComponent = useCallback(
     () =>
       isFetchingNextPage ? (
-        <ActivityIndicator style={{ marginVertical: 16 }} />
+        <ActivityIndicator style={styles.activityIndicator}/>
       ) : null,
     [isFetchingNextPage]
-  );
+  )
+
+  const handleSearchFocus = () => {
+    router.navigate("/(tabs)/search")
+  }
 
   if (isLoading) {
     return (
-      <Container style={{ alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator size="large" />
+      <Container style={styles.loadingContainer}>
+        <ActivityIndicator size="large"/>
       </Container>
-    );
+    )
   }
 
   if (isError) {
     return (
-      <Container style={{ alignItems: "center", justifyContent: "center" }}>
-        <Text>Error: {error?.message}</Text>
+      <Container style={styles.errorContainer}>
+        <Text style={styles.errorText}>Error: {error?.message}</Text>
       </Container>
-    );
+    )
   }
 
   return (
-    <FlashList
-      data={data.pages[0].data}
-      renderItem={renderItem}
-      keyExtractor={keyExtractor}
-      estimatedItemSize={PAGE_SIZE}
-      onEndReached={() => console.log("end reached")}
-      onEndReachedThreshold={0.5}
-      ListFooterComponent={ListFooterComponent}
-    />
-  );
+    <Container>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search characters..."
+          onFocus={handleSearchFocus}
+        />
+        <Pressable onPress={handleSearchFocus} style={styles.searchIcon}>
+          <Ionicons name="search" size={24} color="#6200ee" />
+        </Pressable>
+      </View>
+      <View>
+          <Text>Ulubione postacie: </Text>
+      </View> 
+      <FlashList
+        data={data.pages.flatMap((page: any) => page.data)}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        estimatedItemSize={PAGE_SIZE}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={ListFooterComponent}
+        contentContainerStyle={styles.listContentContainer}
+      />
+    </Container>
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 8,
-    paddingTop: 16,
+    padding: 10,
   },
-  listContent: {
-    paddingHorizontal: 8,
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 20,
+    paddingHorizontal: 10,
   },
-  characterCard: {
-    backgroundColor: "white",
-    borderRadius: 8,
-    margin: 8,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  characterImage: {
-    width: "100%",
-    height: 150,
-    resizeMode: "cover",
-  },
-  characterInfo: {
-    padding: 12,
-  },
-  characterName: {
+  searchInput: {
+    flex: 1,
+    height: 40,
     fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 4,
   },
-  characterHouse: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 2,
+  searchIcon: {
+    padding: 5,
   },
-  characterSpecies: {
-    fontSize: 14,
-    color: "#666",
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
-});
+  errorContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  errorText: {
+    fontFamily: "MagicSchoolOne",
+    fontSize: 24,
+  },
+  listContentContainer: {
+    paddingTop: 10,
+  },
+  activityIndicator: {
+    marginVertical: 16,
+  },
+})

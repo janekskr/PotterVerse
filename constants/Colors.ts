@@ -2,7 +2,7 @@
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
-export const Colors = {
+const Colors = {
   light: {
     text: '#11181C',
     background: '#fff',
@@ -19,4 +19,13 @@ export const Colors = {
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
   },
+  Gryffindor: "#6C0F06",
+  Slytherin: "#134113",
+  Hufflepuff: "#AA7A1F",
+  Ravenclaw: "#135476" ,
+  Black: "#252321",
+  LightGray: "#efeee9",
+  yellow:"#c39a1c"
 };
+
+export default Colors
