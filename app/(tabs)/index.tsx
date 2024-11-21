@@ -51,29 +51,15 @@ export default function HomeScreen() {
     )
   }
 
-  if (isError) {
-    return (
-      <Container style={styles.errorContainer}>
-        <Text style={styles.errorText}>Error: {error?.message}</Text>
-      </Container>
-    )
-  }
+  if (isError) (
+    <Container style={{alignItems: 'center', justifyContent: 'center'}}>
+      <Text type="title">Error 😭</Text>
+    </Container>
+  );
 
   return (
-    <Container>
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search characters..."
-          onFocus={handleSearchFocus}
-        />
-        <Pressable onPress={handleSearchFocus} style={styles.searchIcon}>
-          <Ionicons name="search" size={24} color="#6200ee" />
-        </Pressable>
-      </View>
-      <View>
-          <Text>Ulubione postacie: </Text>
-      </View> 
+    <Container style={{paddingHorizontal: 0}}>
+      <Text type="title" style={{paddingHorizontal: 20}}>Ulubione postacie </Text>
       <FlashList
         data={data.pages.flatMap((page: any) => page.data)}
         renderItem={renderItem}
@@ -89,10 +75,6 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -115,17 +97,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  errorContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  errorText: {
-    fontFamily: "MagicSchoolOne",
-    fontSize: 24,
-  },
   listContentContainer: {
-    paddingTop: 10,
+    paddingHorizontal: 20,
   },
   activityIndicator: {
     marginVertical: 16,

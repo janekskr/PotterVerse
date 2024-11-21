@@ -7,14 +7,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import Colors from "@/constants/Colors";
 import { Character } from "@/lib/types";
 
-const placeholder = "https://avatarfiles.alphacoders.com/375/375208.png";
-
 interface CharacterCardProps {
   character: Character;
 }
 
 export default function CharacterCard({ character }: CharacterCardProps) {
-  // const houseColor = Colors[character.attributes.house as keyof typeof Colors];
+  
   return (
     <Link
       href={{
@@ -28,16 +26,13 @@ export default function CharacterCard({ character }: CharacterCardProps) {
           colors={[Colors.Black, (houseColor as string) ?? "transparent"]}
         > */}
           <Image
-            source={character.attributes?.image ?? placeholder}
+            source={character.attributes?.image ?? require("@/assets/images/placeholder.png")}
             contentPosition="center"
             style={styles.characterImage}
           />
           <View style={styles.characterInfo}>
             <Text style={styles.characterName}>
               {character.attributes?.name}
-            </Text>
-            <Text style={styles.characterHouse}>
-              {character.attributes?.house}
             </Text>
           </View>
         {/* </LinearGradient> */}

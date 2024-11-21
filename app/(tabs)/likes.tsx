@@ -33,17 +33,16 @@ export default function LikesScreen() {
     return <Loader />;
   }
 
-  if (isError) {
-    return (
-      <Container style={{}}>
-        <Text style={styles.errorText}>Error loading liked characters</Text>
+  if (isError) (
+      <Container style={{alignItems: 'center', justifyContent: 'center'}}>
+        <Text type='title'>Error 😭</Text>
       </Container>
     );
-  }
+  
 
   return (
-    <Container>
-      <Text style={styles.title}>Liked Characters</Text>
+    <Container style={{paddingHorizontal: 0}}>
+      <Text type="title" style={{paddingHorizontal: 20}}>Liked Characters</Text>
       {data && data.length > 0 ? (
         <FlatList
           data={data}
@@ -59,14 +58,8 @@ export default function LikesScreen() {
 }
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginVertical: 16,
-    marginHorizontal: 16,
-  },
   listContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20
   },
   emptyText: {
     fontSize: 16,

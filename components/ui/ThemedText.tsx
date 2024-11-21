@@ -1,3 +1,4 @@
+import Colors from '@/constants/Colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Text, type TextProps, StyleSheet } from 'react-native';
 
@@ -18,9 +19,9 @@ const styles = StyleSheet.create({
     fontWeight: "semibold"
   },
   title: {
-    fontSize: 32,
+    fontSize: 24,
+    fontWeight: 'bold',
     lineHeight: 32,
-    letterSpacing: 1
   },
   subtitle: {
     fontSize: 20,
@@ -28,7 +29,8 @@ const styles = StyleSheet.create({
   link: {
     lineHeight: 30,
     fontSize: 16,
-    color: '#0a7ea4',
+    textDecorationLine: "underline",
+    color: Colors.yellow,
   },
 });
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from "react-native";
+import { StyleSheet, View, TouchableOpacity, ColorValue } from "react-native";
 import { Link, useLocalSearchParams, useNavigation } from "expo-router";
 import { Image } from "expo-image";
 import { Container, ParallaxScrollView, Text } from "@/components/ui";
@@ -10,8 +10,8 @@ import { Character } from "@/lib/types";
 import { ExternalLink } from "@/components/ExternalLink";
 import { AntDesign } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
-
-const PLACEHOLDER_IMAGE = "https://avatarfiles.alphacoders.com/375/375208.png";
+import Colors from '@/constants/Colors';
+import { houseImages } from '@/constants/data';
 
 const toggleLikeCharacter = async (characterId: string) => {
   const likedCharacters = await SecureStore.getItemAsync('likedCharacters');
@@ -54,7 +54,7 @@ export default function CharacterDetailScreen() {
 
   React.useEffect(() => {
     if (data) {
-      navigation.setOptions({title: data.attributes.name});
+      navigation.setOptions({title: data.attributes.name, headerTitleStyle: {color: Colors.yellow}});
     }
   }, [data, navigation]);
 
@@ -76,11 +76,11 @@ export default function CharacterDetailScreen() {
     <ParallaxScrollView
       headerImage={
         <Image
-          source={data.attributes.image || PLACEHOLDER_IMAGE}
+          source={data.attributes.image ||  require("@/assets/images/placeholder.png")}
           style={styles.characterImage}
           accessibilityLabel={`Image of ${data.attributes.name}`}
           contentFit="cover"
-          contentPosition={"top"}
+          contentPosition={"center"}
         />
       }
       headerHeight={300}
@@ -95,22 +95,50 @@ export default function CharacterDetailScreen() {
 }
 
 function CharacterContent({ data }: { data: Character["attributes"] }) {
+  const houseImage = data.house ? houseImages[data.house.toLowerCase() as keyof typeof houseImages] : null;
+  const houseColor = data.house ? Colors[data.house as keyof typeof Colors] : null;
   return (
     <View style={styles.characterInfo}>
-      <Text style={styles.characterName}>{data.name}</Text>
+      <View style={styles.nameContainer}>
+        <Text style={styles.characterName}>{data.name}</Text>
+        {houseImage && (
+          <Image
+            source={houseImage}
+            style={styles.houseImage}
+          />
+        )}
+      </View>
+      
       
       {Object.entries(data).map(([key, value]) => {
-        if (["slug","name", "image", "wiki"].includes(key)) {
+        if (["slug", "name", "image", "wiki"].includes(key)) {
           return null;
         }
 
         if (value && (typeof value === "string" || (Array.isArray(value) && value.length > 0))) {
           return (
-            <Text key={key} style={styles.characterDetail}>
-              {key.replace("_", " ")}: {Array.isArray(value) ? value.join(', ') : value}
-            </Text>
+            <View key={key} style={styles.characterDetailItem}>
+              <Text>
+                <Text style={styles.characterDetailLabel}>{key.replace("_", " ")}: </Text>
+                {!Array.isArray(value) && (
+                  <Text style={[
+                    styles.characterDetailValue,
+                    key === "house" && { color: houseColor as ColorValue }
+                  ]}>
+                    {value}
+                  </Text>
+                )}
+              </Text>
+              {Array.isArray(value) && (
+                <View style={styles.characterDetailList}>
+                  {value.map((item, index) => (
+                    <Text key={index} style={styles.characterDetailListItem}>• {item}</Text>
+                  ))}
+                </View>
+              )}
+            </View>
           );
-        }        
+        }
         return null;
       })}
       <ExternalLink href={data.wiki}><Text type="link">Link to wiki</Text></ExternalLink>
@@ -132,11 +160,22 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 16,
   },
+  nameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
   characterName: {
     fontFamily: "MagicSchoolOne",
     fontSize: 50,
     lineHeight: 64,
     textAlign: "center",
+  },
+  houseImage: {
+    width: 55,
+    aspectRatio:1,
+    marginLeft: 16,
   },
   characterDetail: {
     fontSize: 16,
@@ -162,4 +201,24 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
+  characterDetailItem: {
+    marginBottom: 16,
+  },
+  characterDetailLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textTransform: "capitalize",
+    marginBottom: 4,
+  },
+  characterDetailValue: {
+    fontSize: 16,
+  },
+  characterDetailList: {
+    paddingLeft: 16,
+  },
+  characterDetailListItem: {
+    fontSize: 16,
+    marginBottom: 2,
+  },
 });
+
