@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "potter-app",
+    "name": "PotterVerse",
     "slug": "potter-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,11 +8,6 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true
     },
@@ -29,7 +24,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#232323",
+          "image": "./assets/splash-icon.png",
+          "width": 400
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

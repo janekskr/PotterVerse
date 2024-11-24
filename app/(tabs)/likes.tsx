@@ -1,75 +1,67 @@
-import React from 'react';
-import { StyleSheet, FlatList, ListRenderItem } from 'react-native';
-import { Container, Text, View } from '@/components/ui';
-import * as SecureStore from 'expo-secure-store';
-import { fetchCharacterDetail } from '@/lib/api';
-import { Character } from '@/lib/types';
-import CharacterCard from '@/components/CharacterCard';
-import { Loader } from '@/components';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-
-const getLikedCharacterIds = async (): Promise<string[]> => {
-  const likedCharacters = await SecureStore.getItemAsync('likedCharacters');
-  return likedCharacters ? JSON.parse(likedCharacters) : [];
-};
-
-const fetchLikedCharacters = async (): Promise<Character[]> => {
-  const likedCharacters = await getLikedCharacterIds();
-  const characters = await Promise.all(likedCharacters.map(id => fetchCharacterDetail(id)));
-  return characters;
-};
+import React, { useCallback } from "react";
+import { StyleSheet } from "react-native";
+import { Container, Text } from "@/components/ui";
+import { fetchLikedCharacters } from "@/lib/api";
+import { CharacterList, Loader } from "@/components";
+import { useQuery } from "@tanstack/react-query";
+import { useFocusEffect } from "@react-navigation/native";
+import Colors from "@/constants/Colors";
 
 export default function LikesScreen() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['likedCharacters'],
+  const { data, isLoading, isError, refetch, isRefetching } = useQuery({
+    queryKey: ["likedCharacters"],
     queryFn: fetchLikedCharacters,
   });
 
-  const renderItem: ListRenderItem<Character> = ({ item }) => (
-    <CharacterCard character={item} />
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
   );
 
-  if (isLoading) {
+  if (isRefetching || isLoading) {
     return <Loader />;
   }
 
-  if (isError) (
-      <Container style={{alignItems: 'center', justifyContent: 'center'}}>
-        <Text type='title'>Error 😭</Text>
+  if (!data || data.length === 0)
+    return (
+      <Container style={styles.centerContainer}>
+        <Text type="title" style={{color: Colors.yellow}}>No liked characters yet.</Text>
       </Container>
     );
-  
 
   return (
-    <Container style={{paddingHorizontal: 0}}>
-      <Text type="title" style={{paddingHorizontal: 20}}>Liked Characters</Text>
-      {data && data.length > 0 ? (
-        <FlatList
-          data={data}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContainer}
-        />
-      ) : (
-        <Text style={styles.emptyText}>No liked characters yet.</Text>
-      )}
+    <Container style={styles.container}>
+      <Text type="title" style={styles.title}>
+        Liked Characters:
+      </Text>
+      <CharacterList
+        isError={isError}
+        data={data}
+      />
     </Container>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 0,
+  },
+  centerContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    paddingHorizontal: 20,
+  },
   listContainer: {
-    paddingHorizontal: 20
+    paddingHorizontal: 20,
   },
   emptyText: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 32,
-  },
-  errorText: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 32,
-    color: 'red',
   },
 });

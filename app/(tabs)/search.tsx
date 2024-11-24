@@ -1,227 +1,187 @@
-import React, { useState, useEffect } from 'react'
-import { StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, ScrollView, FlatList, Pressable } from 'react-native'
-import { View, Text } from '@/components/ui'
-import { Ionicons } from '@expo/vector-icons'
-import { useCharacters } from '@/hooks/useCharacters'
-import { router } from 'expo-router'
-import * as SecureStore from 'expo-secure-store';
+// SearchPage.tsx
+import React, { useCallback, useMemo, useState, useRef } from "react";
+import { FlatList, Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Container, Text, View as ThemedView } from "@/components/ui";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { loadPreviousSearches, savePreviousSearch } from "@/lib/api";
+import { Ionicons } from "@expo/vector-icons";
+import Colors from "@/constants/Colors";
+import { Link, router } from "expo-router";
+import Shadows from "@/constants/Shadows";
+import CategoryFilters from "@/components/CategoryFilters";
 
-const filterPredicates = [
-  'eq', 'cont', 'start', 'end', 'gt', 'lt', 'gteq', 'lteq', 'present', 'blank', 'null', 'not_null'
-]
+export default function SearchPage() {
+  const [isFocus, setIsFocus] = useState<boolean>(false);
+  const [search, setSearch] = useState<string>("");
+  const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({});
+  const textInputRef = useRef<TextInput>(null);
 
-const filterFields = ['name', 'house', 'patronus', 'species', 'blood_status', 'role']
+  const queryClient = useQueryClient();
 
-async function save(key:string, value:string) {
-    await SecureStore.setItemAsync(key, value);
-}
+  const previousSearches = useSuspenseQuery({
+    queryKey: ["previousSearches"],
+    queryFn: () => loadPreviousSearches(),
+  });
 
-
-export default function SearchScreen() {
-
-  const [searchQuery, setSearchQuery] = useState('')
-  const [field, setField] = useState('name')
-  const [predicate, setPredicate] = useState('cont')
-  const [filterQuery, setFilterQuery] = useState('')
-  const [previousSearches, setPreviousSearches] = useState<string[]>([])
-
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useCharacters(20, filterQuery)
-
-  useEffect(() => {
-    loadPreviousSearches()
-  }, [])
-
-  const loadPreviousSearches = async () => {
-    try {
-      const searches = await SecureStore.getItemAsync('previousSearches')
-      if (searches) {
-        setPreviousSearches(JSON.parse(searches))
-      }
-    } catch (e) {
-      console.error('Failed to load previous searches', e)
-    }
-  }
-
-  const savePreviousSearch = async (query: string) => {
-    try {
-      const updatedSearches = [query, ...previousSearches.filter(s => s !== query).slice(0, 9)]
-      await save('previousSearches', JSON.stringify(updatedSearches))
-      setPreviousSearches(updatedSearches)
-    } catch (e) {
-      console.error('Failed to save search', e)
-    }
-  }
+  const filteredSearches = useMemo(() => {
+    if (!search) return previousSearches.data;
+    return previousSearches.data.filter((item) =>
+      item.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [previousSearches, search]);
 
   const handleSearch = async () => {
-    const query = `filter[${field}_${predicate}]=${searchQuery}`
-    setFilterQuery(query)
-    await savePreviousSearch(searchQuery)
-    await refetch()
-    router.navigate("/(tabs)")
-  }
+    if (search.trim() !== "") {
+      mutation.mutate();
+      
+      router.navigate({
+        pathname: "/search/[result]",
+        params: { result: search, ...selectedFilters },
+      });
+    }
+  };
 
-  const handlePreviousSearch = (query: string) => {
-    setSearchQuery(query)
-    handleSearch()
-  }
+  const mutation = useMutation({
+    mutationFn: () => savePreviousSearch(search, previousSearches.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["previousSearches"] });
+    },
+  });
 
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
-      </View>
-    )
-  }
+  const renderItem = useCallback(
+    ({ item }: { item: string }) => (
+      <Link
+        href={{
+          pathname: "/search/[result]",
+          params: { result: item },
+        }}
+        asChild
+      >
+        <Pressable>
+          <Text style={styles.searchItem}>{item}</Text>
+        </Pressable>
+      </Link>
+    ),
+    []
+  );
 
-  if (isError) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Error: {error?.message}</Text>
-      </View>
-    )
-  }
+  const ListHeaderComponent = useCallback(
+    () => (
+      <Text type="subtitle" style={{ marginBottom: 10 }}>
+        Recent Searches
+      </Text>
+    ),
+    []
+  );
+
+  const handleFilterPress = (category: string, value: string) => {
+    setSelectedFilters((prev) => {
+      const newFilters = { ...prev };
+      if (newFilters[category] === value) {
+        delete newFilters[category];
+      } else {
+        newFilters[category] = value;
+      }
+      return newFilters;
+    });
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search characters..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onSubmitEditing={handleSearch}
+    <Container style={{ paddingVertical: 0, paddingHorizontal: 0 }}>
+      <ThemedView
+        style={{
+          flexDirection: "row",
+          width: "100%",
+          alignItems: "center",
+          gap: 10,
+          paddingHorizontal: 20,
+          paddingVertical: 10,
+          ...Shadows.shadowSm,
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+          }}
+        >
+          {isFocus && (
+            <Pressable
+              onPress={() => {
+                setIsFocus(false);
+                textInputRef.current?.blur();
+              }}
+            >
+              <Ionicons name="arrow-back" size={24} />
+            </Pressable>
+          )}
+          <Pressable
+            onPress={() => {
+              if (isFocus) {
+                handleSearch();
+                setIsFocus(false);
+                textInputRef.current?.blur();
+              } else {
+                textInputRef.current?.focus();
+              }
+            }}
+          >
+            <Ionicons name="search" size={24} />
+          </Pressable>
+          <TextInput
+            ref={textInputRef}
+            value={search}
+            placeholder="Search by name"
+            style={{ flex: 1, fontSize: 16 }}
+            onFocus={() => setIsFocus(true)}
+            onEndEditing={handleSearch}
+            returnKeyType="search"
+            onBlur={() => setIsFocus(false)}
+            onChangeText={(text) => setSearch(text)}
+          />
+          {isFocus && (
+            <Pressable onPress={() => textInputRef.current?.clear()}>
+              <Ionicons name="close" size={24} color="black" />
+            </Pressable>
+          )}
+        </View>
+      </ThemedView>
+      {isFocus ? (
+        <FlatList
+          data={filteredSearches}
+          renderItem={renderItem}
+          style={{ paddingHorizontal: 20 }}
+          ListHeaderComponent={ListHeaderComponent}
+          keyExtractor={(item, index) => `${item}-${index}`}
         />
-        <TouchableOpacity onPress={handleSearch} style={styles.searchIcon}>
-          <Ionicons name="search" size={24} color="#6200ee" />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipContainer}>
-        {filterFields.map((f) => (
-          <TouchableOpacity
-            key={f}
-            style={[styles.chip, field === f && styles.selectedChip]}
-            onPress={() => setField(f)}
-          >
-            <Text style={[styles.chipText, field === f && styles.selectedChipText]}>{f}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipContainer}>
-        {filterPredicates.map((p) => (
-          <TouchableOpacity
-            key={p}
-            style={[styles.chip, predicate === p && styles.selectedChip]}
-            onPress={() => setPredicate(p)}
-          >
-            <Text style={[styles.chipText, predicate === p && styles.selectedChipText]}>{p}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <Pressable onPress={handleSearch} style={styles.searchButton}>
-        <Text style={styles.buttonText}>Search</Text>
-      </Pressable>
-
-      <Text style={styles.previousSearchesTitle}>Previous Searches</Text>
-      <FlatList
-        data={previousSearches}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.previousSearchItem}
-            onPress={() => handlePreviousSearch(item)}
-          >
-            <Text>{item}</Text>
-          </TouchableOpacity>
-        )}
-        keyExtractor={(item, index) => index.toString()}
-      />
-    </View>
-  )
+      ) : (
+        <View style={{ paddingHorizontal: 20 }}>
+          <Text type="subtitle" style={{ marginVertical: 10 }}>Categories</Text>
+          <CategoryFilters
+            selectedFilters={selectedFilters}
+            handleFilterPress={handleFilterPress}
+          />
+        </View>
+      )}
+    </Container>
+  );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 20,
-    paddingHorizontal: 10,
+  searchBarContainer: {
+    flexDirection: "row",
+    width: "100%",
+    alignItems: "center",
+    gap: 10,
   },
   searchInput: {
     flex: 1,
-    height: 40,
     fontSize: 16,
   },
-  searchIcon: {
-    padding: 5,
+  searchItem: {
+    marginBottom: 25,
+    color: Colors.gray,
   },
-  chipContainer: {
-    flexDirection: 'row',
-    marginBottom: 10,
-  },
-  chip: {
-    backgroundColor: '#e0e0e0',
-    borderRadius: 20,
-    padding: 8,
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  selectedChip: {
-    backgroundColor: '#6200ee',
-  },
-  chipText: {
-    color: 'black',
-  },
-  selectedChipText: {
-    color: 'white',
-  },
-  searchButton: {
-    backgroundColor: '#6200ee',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  buttonText: {
-    color: 'white',
-    textAlign: 'center',
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  errorContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  errorText: {
-    fontFamily: 'MagicSchoolOne',
-    fontSize: 24,
-  },
-  previousSearchesTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  previousSearchItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-})
+});

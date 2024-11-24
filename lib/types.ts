@@ -33,14 +33,27 @@ export interface Character {
       self: string;
     };
   }
-  
-  export interface ApiResponse {
-    data: Character[];
-    meta: {
-      copyright: string;
-      generated_at: string;
-    };
-    links: {
-      self: string;
-    };
-  }
+
+export type House = 'gryffindor' | 'slytherin' | 'ravenclaw' | 'hufflepuff';
+
+export type Pagination = {
+  current: number;
+  last: number;
+  next: number | null;
+}
+
+export type ApiType = 'characters' | 'movies' | 'potions' | 'spells';
+
+export interface ApiResponse<T> {
+  data: T[];
+  meta: {
+    pagination: Pagination;
+  };
+}
+
+export interface CharactersResponse {
+  data: Character[];
+  pagination: Pagination;
+}
+
+export type FilterQuery = { [key: string]: string }

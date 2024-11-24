@@ -19,12 +19,13 @@ const Colors = {
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
   },
-  Gryffindor: "#6C0F06",
-  Slytherin: "#134113",
-  Hufflepuff: "#AA7A1F",
-  Ravenclaw: "#135476" ,
+  gryffindor: "#6C0F06",
+  slytherin: "#134113",
+  hufflepuff: "#AA7A1F",
+  ravenclaw: "#135476" ,
   Black: "#252321",
-  LightGray: "#efeee9",
+  lightGray: "#efeee9",
+  gray: "#636363",
   yellow:"#c39a1c"
 };
 

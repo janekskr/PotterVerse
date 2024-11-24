@@ -3,15 +3,22 @@ import { StyleSheet, Pressable } from "react-native";
 import { Image } from "expo-image";
 import { Text, View } from "@/components/ui";
 import { Link } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import Colors from "@/constants/Colors";
 import { Character } from "@/lib/types";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import Shadows from "@/constants/Shadows";
+import LikeButton from "./LikeButton";
 
 interface CharacterCardProps {
   character: Character;
+  isLiked: boolean
 }
 
-export default function CharacterCard({ character }: CharacterCardProps) {
+export default function CharacterCard({ character,isLiked }: CharacterCardProps) {
+  const backgroundColor = useThemeColor(
+    { light: undefined, dark: undefined },
+    "background"
+  );
   
   return (
     <Link
@@ -21,47 +28,47 @@ export default function CharacterCard({ character }: CharacterCardProps) {
       }}
       asChild
     >
-      <Pressable style={styles.characterCardWrapper}>
-        {/* <LinearGradient
-          colors={[Colors.Black, (houseColor as string) ?? "transparent"]}
-        > */}
-          <Image
-            source={character.attributes?.image ?? require("@/assets/images/placeholder.png")}
-            contentPosition="center"
-            style={styles.characterImage}
-          />
-          <View style={styles.characterInfo}>
-            <Text style={styles.characterName}>
-              {character.attributes?.name}
-            </Text>
-          </View>
-        {/* </LinearGradient> */}
+      <Pressable
+        style={{
+          marginBottom: 20,
+          borderRadius: 10,
+          overflow: "hidden",
+          backgroundColor,
+          ...Shadows.shadowSm,
+        }}
+      >
+        <Image
+          source={
+            character.attributes?.image ??
+            require("@/assets/images/placeholder.png")
+          }
+          contentPosition="center"
+          style={styles.characterImage}
+        />
+        <View style={styles.characterInfo}>
+          <Text style={styles.characterName} numberOfLines={1}>
+            {character.attributes?.name}
+          </Text>
+          {/* <LikeButton id={character.id} isLiked={isLiked} /> */}
+        </View>
       </Pressable>
     </Link>
   );
 }
 
 const styles = StyleSheet.create({
-  characterCardWrapper: {
-    marginBottom: 15,
-    borderRadius: 10,
-    overflow: "hidden",
-  },
   characterImage: {
     width: "100%",
     aspectRatio: 16 / 9,
   },
   characterInfo: {
     padding: 12,
+    gap: 5,
   },
   characterName: {
     fontSize: 20,
-    marginBottom: 4,
-    fontWeight: "bold"
-    // fontFamily: "MagicSchoolOne",
-  },
-  characterHouse: {
-    fontSize: 16,
-    fontFamily: "HarryP",
+    fontWeight: "bold",
+    marginRight: 10,
+    flex: 1,
   },
 });

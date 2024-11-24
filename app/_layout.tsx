@@ -54,10 +54,11 @@ function RootLayoutNav() {
     // <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
     <ThemeProvider value={DefaultTheme}>
     <ReactQueryProvider>
-        <Stack>
+        <Stack screenOptions={{headerShadowVisible: false}}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: "modal" }} />
           <Stack.Screen name="character/[id]"/>
+          <Stack.Screen name="house/[houseName]" options={{headerTransparent: true, title: ""}}/>
+          <Stack.Screen name="search" options={{headerShown: false}} />
         </Stack>
       </ReactQueryProvider>
     </ThemeProvider>

@@ -1,5 +1,5 @@
 import type { PropsWithChildren, ReactElement } from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import { Dimensions, StyleSheet, View, ViewStyle } from 'react-native';
 import Animated, {
   interpolate,
   useAnimatedRef,
@@ -14,18 +14,23 @@ type Props = PropsWithChildren<{
   headerImage: ReactElement;
   headerHeight?: number
   style?: ViewStyle;
+  minHeight?:boolean;
 }>;
 
 export default function ParallaxScrollView({
   children,
   headerImage,
   headerHeight = 250,
+  minHeight,
   style,
 }: Props) {
   const backgroundColor = useThemeColor({ light: undefined, dark: undefined }, 'background');
   
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollViewOffset(scrollRef);
+
+  const { height: screenHeight } = Dimensions.get('window');
+  const contentMinHeight = screenHeight - headerHeight - 60;
 
   const headerAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -56,7 +61,7 @@ export default function ParallaxScrollView({
           ]}>
           {headerImage}
         </Animated.View>
-        <Animated.View style={[styles.content, {backgroundColor}, style]}>
+        <Animated.View style={[styles.content, {backgroundColor}, minHeight && {minHeight: contentMinHeight}, style]}>
           {children}
         </Animated.View>
       </Animated.ScrollView>

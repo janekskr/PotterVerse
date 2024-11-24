@@ -1,36 +1,26 @@
-import React from 'react';
-import { StyleSheet, View, TouchableOpacity, ColorValue } from "react-native";
+import React, { useEffect } from "react";
+import {
+  StyleSheet,
+  View,
+  ColorValue,
+} from "react-native";
 import { Link, useLocalSearchParams, useNavigation } from "expo-router";
 import { Image } from "expo-image";
 import { Container, ParallaxScrollView, Text } from "@/components/ui";
-import { useSuspenseQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { fetchCharacterDetail } from "@/lib/api";
-import { Loader } from "@/components";
+import {
+  useSuspenseQuery,
+} from "@tanstack/react-query";
+import { fetchCharacterDetail, getLikes } from "@/lib/api";
+import { LikeButton, Loader } from "@/components";
 import { Character } from "@/lib/types";
 import { ExternalLink } from "@/components/ExternalLink";
-import { AntDesign } from '@expo/vector-icons';
-import * as SecureStore from 'expo-secure-store';
-import Colors from '@/constants/Colors';
-import { houseImages } from '@/constants/data';
-
-const toggleLikeCharacter = async (characterId: string) => {
-  const likedCharacters = await SecureStore.getItemAsync('likedCharacters');
-  let likedArray = likedCharacters ? JSON.parse(likedCharacters) : [];
-
-  if (likedArray.includes(characterId)) {
-    likedArray = likedArray.filter((id: string) => id !== characterId);
-  } else {
-    likedArray.push(characterId);
-  }
-
-  await SecureStore.setItemAsync('likedCharacters', JSON.stringify(likedArray));
-  return likedArray;
-};
+import { houseImages } from "@/constants/data";
+import { getHouseColor } from "@/lib/utils";
+import Shadows from "@/constants/Shadows";
 
 export default function CharacterDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const navigation = useNavigation();
-  const queryClient = useQueryClient();
+  const navigation = useNavigation();  
 
   const { data, isLoading, isError, error } = useSuspenseQuery({
     queryKey: ["characterDetail", id],
@@ -38,30 +28,27 @@ export default function CharacterDetailScreen() {
   });
 
   const { data: likedCharacters } = useSuspenseQuery({
-    queryKey: ["likedCharacters"],
-    queryFn: async () => {
-      const likedIds = await SecureStore.getItemAsync('likedCharacters');
-      return likedIds ? JSON.parse(likedIds) : [];
-    },
+    queryKey: ["likedCharactersIds"],
+    queryFn: () => getLikes(),
   });
 
-  const toggleLikeMutation = useMutation({
-    mutationFn: () => toggleLikeCharacter(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["likedCharacters"] });
-    },
-  });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (data) {
-      navigation.setOptions({title: data.attributes.name, headerTitleStyle: {color: Colors.yellow}});
+      navigation.setOptions({
+        title: data.attributes.name,
+        headerTitleStyle: { color: houseColor},
+        headerTintColor: houseColor
+      });
     }
   }, [data, navigation]);
+
+  const houseColor = getHouseColor(data.attributes.house)
+  const isLiked = likedCharacters.includes(id)
 
   if (isLoading) return <Loader />;
 
   if (isError) {
-    console.error("Error fetching character:", error);
     return (
       <Container style={styles.container}>
         <Text>Nie znaleziono postaci</Text>
@@ -70,61 +57,66 @@ export default function CharacterDetailScreen() {
     );
   }
 
-  const isLiked = likedCharacters?.includes(id);
-
   return (
     <ParallaxScrollView
+      minHeight
       headerImage={
-        <Image
-          source={data.attributes.image ||  require("@/assets/images/placeholder.png")}
-          style={styles.characterImage}
-          accessibilityLabel={`Image of ${data.attributes.name}`}
-          contentFit="cover"
-          contentPosition={"center"}
-        />
+        <View style={{ position: "relative" }}>
+          <Image
+            source={
+              data.attributes.image ||
+              require("@/assets/images/placeholder.png")
+            }
+            style={styles.characterImage}
+            accessibilityLabel={`Image of ${data.attributes.name}`}
+            contentFit="cover"
+            contentPosition={"center"}
+          />
+          <LikeButton style={styles.likeButton} id={id} isLiked={isLiked}/>
+        </View>
       }
       headerHeight={300}
       style={{ padding: 0 }}
     >
-      <CharacterContent data={data.attributes} />
-      <TouchableOpacity onPress={() => toggleLikeMutation.mutate()} style={styles.likeButton}>
-        <AntDesign name={isLiked ? "heart" : "hearto"} size={24} color="red" />
-      </TouchableOpacity>
+      <CharacterContent data={data.attributes} houseColor={houseColor} />
     </ParallaxScrollView>
   );
 }
 
-function CharacterContent({ data }: { data: Character["attributes"] }) {
-  const houseImage = data.house ? houseImages[data.house.toLowerCase() as keyof typeof houseImages] : null;
-  const houseColor = data.house ? Colors[data.house as keyof typeof Colors] : null;
+function CharacterContent({ data, houseColor }: { data: Character["attributes"], houseColor: ColorValue | null }) {
+  const houseImage = data.house
+    ? houseImages[data.house.toLowerCase() as keyof typeof houseImages]
+    : null;
   return (
     <View style={styles.characterInfo}>
       <View style={styles.nameContainer}>
-        <Text style={styles.characterName}>{data.name}</Text>
-        {houseImage && (
-          <Image
-            source={houseImage}
-            style={styles.houseImage}
-          />
-        )}
+        <Text style={styles.characterName} numberOfLines={2}>{data.name}</Text>
+        {houseImage && <Image source={houseImage} style={styles.houseImage} />}
       </View>
-      
-      
+
       {Object.entries(data).map(([key, value]) => {
         if (["slug", "name", "image", "wiki"].includes(key)) {
           return null;
         }
 
-        if (value && (typeof value === "string" || (Array.isArray(value) && value.length > 0))) {
+        if (
+          value &&
+          (typeof value === "string" ||
+            (Array.isArray(value) && value.length > 0))
+        ) {
           return (
             <View key={key} style={styles.characterDetailItem}>
               <Text>
-                <Text style={styles.characterDetailLabel}>{key.replace("_", " ")}: </Text>
+                <Text style={styles.characterDetailLabel}>
+                  {key.replace("_", " ")}:{" "}
+                </Text>
                 {!Array.isArray(value) && (
-                  <Text style={[
-                    styles.characterDetailValue,
-                    key === "house" && { color: houseColor as ColorValue }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.characterDetailValue,
+                      key === "house" && houseColor && { color: houseColor },
+                    ]}
+                  >
                     {value}
                   </Text>
                 )}
@@ -132,7 +124,9 @@ function CharacterContent({ data }: { data: Character["attributes"] }) {
               {Array.isArray(value) && (
                 <View style={styles.characterDetailList}>
                   {value.map((item, index) => (
-                    <Text key={index} style={styles.characterDetailListItem}>• {item}</Text>
+                    <Text key={index} style={styles.characterDetailListItem}>
+                      • {item}
+                    </Text>
                   ))}
                 </View>
               )}
@@ -141,15 +135,19 @@ function CharacterContent({ data }: { data: Character["attributes"] }) {
         }
         return null;
       })}
-      <ExternalLink href={data.wiki}><Text type="link">Link to wiki</Text></ExternalLink>
+      <ExternalLink href={data.wiki}>
+        <Text type="link" style={houseColor && { color: houseColor }}>
+          Link to wiki
+        </Text>
+      </ExternalLink>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center"
   },
   characterImage: {
     width: "100%",
@@ -161,20 +159,21 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   nameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 16,
+    paddingHorizontal: 10,
   },
   characterName: {
     fontFamily: "MagicSchoolOne",
-    fontSize: 50,
-    lineHeight: 64,
+    fontSize: 45,
+    lineHeight: 50,
     textAlign: "center",
   },
   houseImage: {
     width: 55,
-    aspectRatio:1,
+    aspectRatio: 1,
     marginLeft: 16,
   },
   characterDetail: {
@@ -186,27 +185,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   likeButton: {
-    position: 'absolute',
-    top: 310,
-    right: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
+    position: "absolute",
+    bottom: 15,
+    right: 15,
+    backgroundColor: "white",
+    borderRadius: 100,
     padding: 10,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...Shadows.shadowBase
   },
   characterDetailItem: {
     marginBottom: 16,
   },
   characterDetailLabel: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     textTransform: "capitalize",
     marginBottom: 4,
   },
@@ -221,4 +213,3 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
 });
-
