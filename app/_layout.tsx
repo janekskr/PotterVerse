@@ -11,7 +11,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 import "react-native-reanimated";
-import { Colors } from "react-native/Libraries/NewAppScreen";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -51,8 +50,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    // <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-    <ThemeProvider value={DefaultTheme}>
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
     <ReactQueryProvider>
         <Stack screenOptions={{headerShadowVisible: false}}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

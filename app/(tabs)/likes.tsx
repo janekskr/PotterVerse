@@ -26,7 +26,7 @@ export default function LikesScreen() {
   if (!data || data.length === 0)
     return (
       <Container style={styles.centerContainer}>
-        <Text type="title" style={{color: Colors.yellow}}>No liked characters yet.</Text>
+        <Text type="title" style={{color: Colors.primary}}>No liked characters yet.</Text>
       </Container>
     );
 

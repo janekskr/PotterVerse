@@ -1,13 +1,12 @@
 import React from "react";
-import { StyleSheet, Pressable } from "react-native";
+import { StyleSheet, Pressable, View } from "react-native";
 import { Image } from "expo-image";
-import { Text, View } from "@/components/ui";
+import { Text } from "@/components/ui";
 import { Link } from "expo-router";
-import Colors from "@/constants/Colors";
 import { Character } from "@/lib/types";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import Shadows from "@/constants/Shadows";
-import LikeButton from "./LikeButton";
+// import LikeButton from "./LikeButton";
 
 interface CharacterCardProps {
   character: Character;
@@ -16,7 +15,7 @@ interface CharacterCardProps {
 
 export default function CharacterCard({ character,isLiked }: CharacterCardProps) {
   const backgroundColor = useThemeColor(
-    { light: undefined, dark: undefined },
+    { dark: "#1c1c1c" },
     "background"
   );
   

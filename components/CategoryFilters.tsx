@@ -1,9 +1,8 @@
-// CategoryFilters.tsx
-import React, { useCallback } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { Text } from '@/components/ui';
 import Colors from '@/constants/Colors';
 import { getHouseColor } from '@/lib/utils';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type FilterOption = {
   label: string;
@@ -57,6 +56,8 @@ const filterCategories: FilterCategory[] = [
 ];
 
 const CategoryFilters: React.FC<CategoryFiltersProps> = ({ selectedFilters, handleFilterPress }) => {
+  const backgroundColor = useThemeColor({light: "#efeee9",dark: "#232323"}, "background")
+
   return (
     <View style={styles.container}>
       {filterCategories.map((category) => (
@@ -70,6 +71,7 @@ const CategoryFilters: React.FC<CategoryFiltersProps> = ({ selectedFilters, hand
                 key={option.value}
                 style={[
                   styles.filterOption,
+                  {backgroundColor},
                   selectedFilters[category.name] === option.value && styles.selectedOption,
                   category.name === 'house' && selectedFilters[category.name] === option.value && {
                     backgroundColor: getHouseColor(option.value) ?? undefined,
@@ -110,7 +112,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   filterOption: {
-    backgroundColor: Colors.lightGray,
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   selectedOption: {
-    backgroundColor: Colors.yellow,
+    backgroundColor: Colors.primary,
   },
   filterOptionText: {
     color: Colors.gray,

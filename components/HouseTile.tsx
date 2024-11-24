@@ -1,5 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
-import React from "react";
+import { Text, Pressable, StyleSheet } from "react-native";
 import { House } from "@/lib/types";
 import { Link } from "expo-router";
 import { Image } from "expo-image";
@@ -11,7 +10,7 @@ import Shadows from "@/constants/Shadows";
 export default function HouseTile({ houseName }: { houseName: House }) {
   const color = getHouseColor(houseName);
   const backgroundColor = useThemeColor(
-    { light: undefined, dark: undefined },
+    { dark: "#1c1c1c" },
     "background"
   );
 

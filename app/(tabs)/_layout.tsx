@@ -1,13 +1,11 @@
 import React from "react";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Link, Tabs } from "expo-router";
-import { Pressable, TextInput } from "react-native";
+import { Tabs } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { type IconProps } from "@expo/vector-icons/build/createIconSet";
 import { type ComponentProps } from "react";
 import Colors from "@/constants/Colors";
-import { Text, View } from "@/components/ui";
 import Logo from "@/components/Logo";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 function TabBarIcon({
   focused,
@@ -25,13 +23,15 @@ function TabBarIcon({
 }
 
 export default function TabLayout() {
+  const backgroundColor = useThemeColor({},"background")
   return (
     <Tabs
       screenOptions={{
         tabBarShowLabel: false,
         tabBarLabelStyle: { marginBottom: -15 },
         tabBarHideOnKeyboard: true,
-        tabBarActiveTintColor: Colors.yellow,
+        tabBarActiveTintColor: Colors.primary,
+        headerStyle: {backgroundColor},
         headerTitle: () => (
           <Logo/>
         ),

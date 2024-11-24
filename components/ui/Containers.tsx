@@ -10,7 +10,7 @@ interface ContainerProps extends ThemedViewProps {
 
 function ScrollableContainer({ children, style, ...rest }: ContainerProps) {
   const backgroundColor = useThemeColor(
-    { light: undefined, dark: undefined },
+    {},
     "background"
   );
   return (

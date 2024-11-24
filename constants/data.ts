@@ -1,5 +1,3 @@
-import { House } from "@/lib/types";
-
 export const houseImages: Record<string, (id: string) => any> = {
   gryffindor: require('@/assets/images/houses/gryffindor.png'),
   slytherin: require('@/assets/images/houses/slytherin.png'),

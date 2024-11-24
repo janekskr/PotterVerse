@@ -1,4 +1,3 @@
-import Colors from '@/constants/Colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Text, type TextProps, StyleSheet } from 'react-native';
 

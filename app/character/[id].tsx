@@ -1,15 +1,9 @@
 import React, { useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  ColorValue,
-} from "react-native";
+import { StyleSheet, View, ColorValue } from "react-native";
 import { Link, useLocalSearchParams, useNavigation } from "expo-router";
 import { Image } from "expo-image";
 import { Container, ParallaxScrollView, Text } from "@/components/ui";
-import {
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { fetchCharacterDetail, getLikes } from "@/lib/api";
 import { LikeButton, Loader } from "@/components";
 import { Character } from "@/lib/types";
@@ -20,9 +14,9 @@ import Shadows from "@/constants/Shadows";
 
 export default function CharacterDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const navigation = useNavigation();  
+  const navigation = useNavigation();
 
-  const { data, isLoading, isError, error } = useSuspenseQuery({
+  const { data, isLoading, isError } = useSuspenseQuery({
     queryKey: ["characterDetail", id],
     queryFn: () => fetchCharacterDetail(id),
   });
@@ -32,19 +26,18 @@ export default function CharacterDetailScreen() {
     queryFn: () => getLikes(),
   });
 
+  const houseColor = getHouseColor(data.attributes.house);
+  const isLiked = likedCharacters.includes(id);
 
   useEffect(() => {
     if (data) {
       navigation.setOptions({
         title: data.attributes.name,
-        headerTitleStyle: { color: houseColor},
-        headerTintColor: houseColor
+        headerTitleStyle: { color: houseColor },
+        headerTintColor: houseColor,
       });
     }
-  }, [data, navigation]);
-
-  const houseColor = getHouseColor(data.attributes.house)
-  const isLiked = likedCharacters.includes(id)
+  }, [data, navigation, houseColor]);
 
   if (isLoading) return <Loader />;
 
@@ -52,7 +45,7 @@ export default function CharacterDetailScreen() {
     return (
       <Container style={styles.container}>
         <Text>Nie znaleziono postaci</Text>
-        <Link href="/(tabs)">Powrót</Link>
+        <Link href="/">Powrót</Link>
       </Container>
     );
   }
@@ -72,7 +65,7 @@ export default function CharacterDetailScreen() {
             contentFit="cover"
             contentPosition={"center"}
           />
-          <LikeButton style={styles.likeButton} id={id} isLiked={isLiked}/>
+          <LikeButton style={styles.likeButton} id={id} isLiked={isLiked} />
         </View>
       }
       headerHeight={300}
@@ -83,14 +76,22 @@ export default function CharacterDetailScreen() {
   );
 }
 
-function CharacterContent({ data, houseColor }: { data: Character["attributes"], houseColor: ColorValue | null }) {
+function CharacterContent({
+  data,
+  houseColor,
+}: {
+  data: Character["attributes"];
+  houseColor: ColorValue | null;
+}) {
   const houseImage = data.house
     ? houseImages[data.house.toLowerCase() as keyof typeof houseImages]
     : null;
   return (
     <View style={styles.characterInfo}>
       <View style={styles.nameContainer}>
-        <Text style={styles.characterName} numberOfLines={2}>{data.name}</Text>
+        <Text style={styles.characterName} numberOfLines={2}>
+          {data.name}
+        </Text>
         {houseImage && <Image source={houseImage} style={styles.houseImage} />}
       </View>
 
@@ -147,7 +148,8 @@ function CharacterContent({ data, houseColor }: { data: Character["attributes"],
 const styles = StyleSheet.create({
   container: {
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
+    textAlign: "center"
   },
   characterImage: {
     width: "100%",
@@ -191,7 +193,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 100,
     padding: 10,
-    ...Shadows.shadowBase
+    ...Shadows.shadowBase,
   },
   characterDetailItem: {
     marginBottom: 16,

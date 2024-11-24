@@ -1,6 +1,5 @@
-// SearchPage.tsx
 import React, { useCallback, useMemo, useState, useRef } from "react";
-import { FlatList, Pressable, StyleSheet, TextInput, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, TextInput, useColorScheme, View } from "react-native";
 import { Container, Text, View as ThemedView } from "@/components/ui";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { loadPreviousSearches, savePreviousSearch } from "@/lib/api";
@@ -8,7 +7,8 @@ import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import { Link, router } from "expo-router";
 import Shadows from "@/constants/Shadows";
-import CategoryFilters from "@/components/CategoryFilters";
+import {CategoryFilters} from "@/components";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 export default function SearchPage() {
   const [isFocus, setIsFocus] = useState<boolean>(false);
@@ -16,6 +16,7 @@ export default function SearchPage() {
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({});
   const textInputRef = useRef<TextInput>(null);
 
+  const color = useThemeColor({}, "text")
   const queryClient = useQueryClient();
 
   const previousSearches = useSuspenseQuery({
@@ -114,7 +115,7 @@ export default function SearchPage() {
                 textInputRef.current?.blur();
               }}
             >
-              <Ionicons name="arrow-back" size={24} />
+              <Ionicons name="arrow-back" size={24} color={color} />
             </Pressable>
           )}
           <Pressable
@@ -128,22 +129,23 @@ export default function SearchPage() {
               }
             }}
           >
-            <Ionicons name="search" size={24} />
+            <Ionicons name="search" size={24} color={color} />
           </Pressable>
           <TextInput
             ref={textInputRef}
             value={search}
             placeholder="Search by name"
-            style={{ flex: 1, fontSize: 16 }}
+            style={{ flex: 1, fontSize: 16, color }}
             onFocus={() => setIsFocus(true)}
             onEndEditing={handleSearch}
             returnKeyType="search"
             onBlur={() => setIsFocus(false)}
             onChangeText={(text) => setSearch(text)}
+            placeholderTextColor={useColorScheme() === "dark" ? Colors.gray:undefined}
           />
           {isFocus && (
             <Pressable onPress={() => textInputRef.current?.clear()}>
-              <Ionicons name="close" size={24} color="black" />
+              <Ionicons name="close" size={24} color={color} />
             </Pressable>
           )}
         </View>
@@ -158,7 +160,7 @@ export default function SearchPage() {
         />
       ) : (
         <View style={{ paddingHorizontal: 20 }}>
-          <Text type="subtitle" style={{ marginVertical: 10 }}>Categories</Text>
+          <Text style={{ marginVertical: 10, fontSize: 22, fontWeight: "bold" }}>Categories:</Text>
           <CategoryFilters
             selectedFilters={selectedFilters}
             handleFilterPress={handleFilterPress}

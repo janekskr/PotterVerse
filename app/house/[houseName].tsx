@@ -2,18 +2,13 @@ import React, { useCallback, useEffect } from "react";
 import {
   View,
   StyleSheet,
-  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { FlashList } from "@shopify/flash-list";
 import { Container, Text } from "@/components/ui";
-import { CharacterCard, CharacterList } from "@/components";
-import { Character } from "@/lib/types";
+import { CharacterList } from "@/components";
 import { getHouseColor } from "@/lib/utils";
 import { houseImages } from "@/constants/data";
 import { Image } from "expo-image";
-import { useQuery } from "@tanstack/react-query";
-import { getLikes } from "@/lib/api";
 import { useApiQuery } from "@/hooks/useApiQuery";
 
 const PAGE_SIZE = 50;
