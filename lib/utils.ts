@@ -6,3 +6,5 @@ export function getHouseColor(houseName: string | null) {
     const color = Colors[houseName.toLowerCase() as keyof typeof Colors] as ColorValue
     return color
 }
+
+export const isObjectEmpty = (object:object) => Object.keys(object).length === 0

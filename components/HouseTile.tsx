@@ -14,6 +14,11 @@ export default function HouseTile({ houseName }: { houseName: House }) {
     "background"
   );
 
+  const borderColor = useThemeColor(
+    {},
+    "border"
+  );
+
   return (
     <Link
       key={houseName}
@@ -30,6 +35,8 @@ export default function HouseTile({ houseName }: { houseName: House }) {
           justifyContent: "space-between",
           padding: 10,
           borderRadius: 10,
+          borderWidth: 1,
+          borderColor
         }}
       >
         <Image source={houseImages[houseName]} style={styles.houseImage} />

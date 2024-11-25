@@ -2,10 +2,12 @@ const Colors = {
   light: {
     text: '#11181C',
     background: '#fff',
+    border: "transparent"
   },
   dark: {
     text: '#ECEDEE',
     background: '#151718',
+    border: "#636363"
   },
   gryffindor: "#6C0F06",
   slytherin: "#134113",

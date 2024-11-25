@@ -1,22 +1,36 @@
-import React, { useCallback, useMemo, useState, useRef } from "react";
-import { FlatList, Pressable, StyleSheet, TextInput, useColorScheme, View } from "react-native";
+import { useCallback, useMemo, useState, useRef } from "react";
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  useColorScheme,
+  View,
+} from "react-native";
 import { Container, Text, View as ThemedView } from "@/components/ui";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { loadPreviousSearches, savePreviousSearch } from "@/lib/api";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import { Link, router } from "expo-router";
 import Shadows from "@/constants/Shadows";
-import {CategoryFilters} from "@/components";
+import { CategoryFilters } from "@/components";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { isObjectEmpty } from "@/lib/utils";
 
 export default function SearchPage() {
   const [isFocus, setIsFocus] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
-  const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({});
+  const [selectedFilters, setSelectedFilters] = useState<
+    Record<string, string>
+  >({});
   const textInputRef = useRef<TextInput>(null);
 
-  const color = useThemeColor({}, "text")
+  const color = useThemeColor({}, "text");
   const queryClient = useQueryClient();
 
   const previousSearches = useSuspenseQuery({
@@ -32,12 +46,17 @@ export default function SearchPage() {
   }, [previousSearches, search]);
 
   const handleSearch = async () => {
-    if (search.trim() !== "") {
-      mutation.mutate();
-      
+    const trimedSearch = search.trim() !== "";
+    if (trimedSearch || !isObjectEmpty(selectedFilters)) {
+      const searchParams = { ...selectedFilters };
+
+      if (trimedSearch) {
+        searchParams.result = search;
+        mutation.mutate();
+      }
       router.navigate({
         pathname: "/search/[result]",
-        params: { result: search, ...selectedFilters },
+        params: searchParams as any,
       });
     }
   };
@@ -119,15 +138,7 @@ export default function SearchPage() {
             </Pressable>
           )}
           <Pressable
-            onPress={() => {
-              if (isFocus) {
-                handleSearch();
-                setIsFocus(false);
-                textInputRef.current?.blur();
-              } else {
-                textInputRef.current?.focus();
-              }
-            }}
+            onPress={handleSearch}
           >
             <Ionicons name="search" size={24} color={color} />
           </Pressable>
@@ -141,7 +152,9 @@ export default function SearchPage() {
             returnKeyType="search"
             onBlur={() => setIsFocus(false)}
             onChangeText={(text) => setSearch(text)}
-            placeholderTextColor={useColorScheme() === "dark" ? Colors.gray:undefined}
+            placeholderTextColor={
+              useColorScheme() === "dark" ? Colors.gray : undefined
+            }
           />
           {isFocus && (
             <Pressable onPress={() => textInputRef.current?.clear()}>
@@ -160,7 +173,11 @@ export default function SearchPage() {
         />
       ) : (
         <View style={{ paddingHorizontal: 20 }}>
-          <Text style={{ marginVertical: 10, fontSize: 22, fontWeight: "bold" }}>Categories:</Text>
+          <Text
+            style={{ marginVertical: 10, fontSize: 22, fontWeight: "bold" }}
+          >
+            Categories:
+          </Text>
           <CategoryFilters
             selectedFilters={selectedFilters}
             handleFilterPress={handleFilterPress}

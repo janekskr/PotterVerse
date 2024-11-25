@@ -33,6 +33,7 @@ yarn-error.*
 .env*.local
 
 #lock files
+
 pakcage.lock.json
 bun.lockb
 

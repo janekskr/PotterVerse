@@ -23,9 +23,7 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-    HarryP: require("../assets/fonts/HarryP.ttf"),
     MagicSchoolOne: require("../assets/fonts/MagicSchoolOne.ttf"),
-    MagicSchoolTwo: require("../assets/fonts/MagicSchoolTwo.ttf"),
     ...FontAwesome.font,
   });
 

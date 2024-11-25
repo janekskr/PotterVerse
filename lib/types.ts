@@ -56,4 +56,4 @@ export interface CharactersResponse {
   pagination: Pagination;
 }
 
-export type FilterQuery = { [key: string]: string }
+export type FilterQuery = { [key: string]: string | undefined }
