@@ -40,13 +40,23 @@ export default function SearchResultPage() {
 
   const allCharacters = data?.pages.flatMap((page: any) => page.data) || [];
 
-  if (!data || allCharacters.length === 0) {
-    return (
-      <Container style={styles.centerContainer}>
+  if (!data || allCharacters.length === 0) { 
+    return ( 
+      <Container style={styles.centerContainer}> 
         <Text>No results found for <Text style={{color: Colors.primary, fontWeight: "bold"}}>"{result}"</Text></Text>
-      </Container>
-    );
-  }
+        {Object.entries(filters).length > 0 && (
+          <Text style={styles.filtersText}>
+            Filters: 
+            {Object.entries(filters).map(([key, value]) => (
+              <Text key={key} style={styles.filterItem}>
+                {value}
+              </Text>
+            ))}
+          </Text>
+        )}
+      </Container> 
+    ); 
+  } 
 
 
   return (
@@ -63,12 +73,20 @@ export default function SearchResultPage() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 0,
+const styles = StyleSheet.create({ 
+  container: { 
+    paddingHorizontal: 0, 
+  }, 
+  centerContainer: { 
+    justifyContent: "center", 
+    alignItems: "center", 
   },
-  centerContainer: {
-    justifyContent: "center",
-    alignItems: "center",
+  filtersText: {
+    marginRight: 10
+  },
+  filterItem: {
+    color: Colors.primary,
+    fontWeight: "bold",
+    fontStyle: "italic"
   },
 });
